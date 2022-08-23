@@ -192,15 +192,15 @@ func (s *server) unitHandler(ctx *gin.Context) {
 	if set {
 		var jobID int
 		var err error
-		ch := make(chan string)
+		var result=
 
 		// perform operation (replacing any previously queued changes)
-		if operation == "restart" {
-			jobID, err = s.dbusConn.RestartUnit(name, "replace", ch)
-		} else if operation == "stop" {
-			jobID, err = s.dbusConn.StopUnit(name, "replace", ch)
-		} else if operation == "start" {
-			jobID, err = s.dbusConn.StartUnit(name, "replace", ch)
+		if operation == "restart" || operation=="stop" || operation=="start" {
+			if name=="matron" {
+				exec.Command("/home/we/norns/restart_matron.sh")
+			} else {
+				exec.Command("/home/we/norns/restart_sclang.sh")
+			}
 		} else {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "unrecognized operation"})
 			return
@@ -213,7 +213,6 @@ func (s *server) unitHandler(ctx *gin.Context) {
 		}
 
 		// package operation result
-		result := <-ch
 		ctx.JSON(http.StatusOK, gin.H{
 			"job_id": jobID,
 			"result": result,
