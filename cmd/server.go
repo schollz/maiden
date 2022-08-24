@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -192,15 +193,16 @@ func (s *server) unitHandler(ctx *gin.Context) {
 	if set {
 		var jobID int
 		var err error
-		var result=
+		var result = "done"
 
 		// perform operation (replacing any previously queued changes)
-		if operation == "restart" || operation=="stop" || operation=="start" {
-			if name=="matron" {
-				exec.Command("/home/we/norns/restart_matron.sh")
-			} else {
-				exec.Command("/home/we/norns/restart_sclang.sh")
+		if operation == "restart" || operation == "stop" || operation == "start" {
+			fmt.Println("operation", operation, "name", name)
+			cmd := exec.Command("/home/we/norns/restart_sclang.sh")
+			if strings.Contains(name, "matron") {
+				cmd = exec.Command("/home/we/norns/restart_matron.sh")
 			}
+			err = cmd.Run()
 		} else {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "unrecognized operation"})
 			return
